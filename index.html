@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>任务管理系统 - 水水的工作台</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <header class="app-header">
+    <div class="header-left">
+      <h1 class="app-title">任务管理系统</h1>
+      <span class="app-subtitle">水水的工作台</span>
+    </div>
+    <nav class="header-nav">
+      <a href="#" class="nav-link active" data-view="dashboard">工作看板</a>
+      <a href="#" class="nav-link" data-view="request">提需入口</a>
+      <a href="#" class="nav-link" data-view="track">需求追踪</a>
+    </nav>
+    <div class="header-right">
+      <span class="queue-badge" id="queueBadge">排队 0</span>
+      <span class="in-progress-badge" id="inProgressBadge">进行中 0</span>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="app-main">
+
+    <!-- ==================== 工作看板 ==================== -->
+    <section class="view" id="view-dashboard">
+      <!-- 统计卡片 -->
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card stat-total">
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-label">总任务</div>
+        </div>
+        <div class="stat-card stat-pending">
+          <div class="stat-value" id="statPending">0</div>
+          <div class="stat-label">待排序</div>
+        </div>
+        <div class="stat-card stat-queued">
+          <div class="stat-value" id="statQueued">0</div>
+          <div class="stat-label">排队中</div>
+        </div>
+        <div class="stat-card stat-progress">
+          <div class="stat-value" id="statInProgress">0</div>
+          <div class="stat-label">进行中</div>
+        </div>
+        <div class="stat-card stat-done">
+          <div class="stat-value" id="statDone">0</div>
+          <div class="stat-label">已完成</div>
+        </div>
+      </div>
+
+      <!-- 告警区 -->
+      <div class="alert-area" id="alertArea"></div>
+
+      <!-- 当前进行中 -->
+      <div class="current-task-section" id="currentTaskSection">
+        <h2 class="section-title">当前进行中</h2>
+        <div class="current-task-card" id="currentTaskCard">
+          <div class="empty-state">暂无进行中的任务，从下方队列中选择一个开始吧</div>
+        </div>
+      </div>
+
+      <!-- 四象限视图 -->
+      <div class="quadrant-section">
+        <h2 class="section-title">任务四象限</h2>
+        <div class="quadrant-grid">
+          <div class="quadrant q-urgent-important" id="quadUI">
+            <div class="quadrant-header">
+              <span class="quadrant-label">紧急且重要</span>
+              <span class="quadrant-count" id="countUI">0</span>
+            </div>
+            <div class="quadrant-tasks" id="tasksUI"></div>
+          </div>
+          <div class="quadrant q-noturgent-important" id="quadNI">
+            <div class="quadrant-header">
+              <span class="quadrant-label">重要不紧急</span>
+              <span class="quadrant-count" id="countNI">0</span>
+            </div>
+            <div class="quadrant-tasks" id="tasksNI"></div>
+          </div>
+          <div class="quadrant q-urgent-notimportant" id="quadUN">
+            <div class="quadrant-header">
+              <span class="quadrant-label">紧急不重要</span>
+              <span class="quadrant-count" id="countUN">0</span>
+            </div>
+            <div class="quadrant-tasks" id="tasksUN"></div>
+          </div>
+          <div class="quadrant q-noturgent-notimportant" id="quadNN">
+            <div class="quadrant-header">
+              <span class="quadrant-label">不重要不紧急</span>
+              <span class="quadrant-count" id="countNN">0</span>
+            </div>
+            <div class="quadrant-tasks" id="tasksNN"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 待排序区 -->
+      <div class="pending-section" id="pendingSection">
+        <h2 class="section-title">待排序 <span class="pending-count" id="pendingCount">0</span></h2>
+        <div class="pending-tasks" id="pendingTasks">
+          <div class="empty-state">没有待排序的任务</div>
+        </div>
+      </div>
+
+      <!-- 周视图 -->
+      <div class="week-section">
+        <h2 class="section-title">本周负载</h2>
+        <div class="week-grid" id="weekGrid"></div>
+      </div>
+
+      <!-- 已完成列表 -->
+      <div class="done-section">
+        <h2 class="section-title">已完成</h2>
+        <div class="done-list" id="doneList">
+          <div class="empty-state">暂无已完成任务</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 提需入口 ==================== -->
+    <section class="view hidden" id="view-request">
+      <div class="request-container">
+        <div class="request-intro">
+          <h2>向水水提需求</h2>
+          <p>用自然语言描述你的需求，AI 会自动解析成结构化信息。解析后你可以确认和修改。</p>
+          <div class="request-rules">
+            <h3>提需规范</h3>
+            <ul>
+              <li>请尽量描述清楚：<strong>要做什么、为什么做、期望什么时候完成</strong></li>
+              <li>如有参考文档/链接/截图，请附上</li>
+              <li>信息不全的需求会被退回，请认真填写</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 第一步：白话输入 -->
+        <div class="request-step" id="step1">
+          <div class="step-indicator">第1步：描述你的需求</div>
+          <textarea id="rawRequest" placeholder="用大白话描述你的需求，比如：
+
+"下周帮我看一下轻松渠道的数据，领导要看，挺急的。需要对比上月同期的转化率，有参考文档在 xxx""
+          ></textarea>
+          <div class="request-meta">
+            <div class="form-group">
+              <label>你的身份</label>
+              <select id="requesterRole">
+                <option value="">请选择</option>
+                <option value="轻松">轻松渠道商务</option>
+                <option value="学海">学海渠道商务</option>
+                <option value="好奇">好奇渠道商务</option>
+                <option value="和谐号">和谐号渠道商务</option>
+                <option value="中碳">中碳渠道商务</option>
+                <option value="后端转化">后端转化</option>
+                <option value="领导">领导</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>你的姓名</label>
+              <input type="text" id="requesterName" placeholder="请输入姓名">
+            </div>
+          </div>
+          <button class="btn btn-primary" id="btnParse" disabled>AI 解析需求</button>
+        </div>
+
+        <!-- 第二步：确认/修改 -->
+        <div class="request-step hidden" id="step2">
+          <div class="step-indicator">第2步：确认和修改</div>
+          <div class="parsed-preview" id="parsedPreview"></div>
+          <div class="step2-actions">
+            <button class="btn btn-secondary" id="btnBack">返回修改</button>
+            <button class="btn btn-primary" id="btnSubmit">确认提交</button>
+          </div>
+        </div>
+
+        <!-- 第三步：提交成功 -->
+        <div class="request-step hidden" id="step3">
+          <div class="step-indicator">提交成功</div>
+          <div class="success-message">
+            <div class="success-icon">&#10003;</div>
+            <h3>需求已提交</h3>
+            <p>你的需求已进入水水的待排序队列，可以通过「需求追踪」查看状态。</p>
+            <p class="task-id-display">需求编号：<span id="submittedTaskId"></span></p>
+          </div>
+          <button class="btn btn-secondary" id="btnNewRequest">提交新需求</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 需求追踪 ==================== -->
+    <section class="view hidden" id="view-track">
+      <div class="track-container">
+        <h2>需求追踪</h2>
+        <p>查看你提交的需求当前状态</p>
+        <div class="track-search">
+          <input type="text" id="trackSearchInput" placeholder="输入需求编号或你的姓名搜索...">
+          <button class="btn btn-primary" id="btnTrackSearch">搜索</button>
+        </div>
+        <div class="track-results" id="trackResults">
+          <div class="empty-state">输入需求编号或姓名搜索</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 任务详情弹窗 -->
+  <div class="modal-overlay hidden" id="taskModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">任务详情</h3>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer" id="modalFooter"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="js/store.js"></script>
+  <script src="js/parser.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/request.js"></script>
+  <script src="js/track.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
