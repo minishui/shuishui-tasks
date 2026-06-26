@@ -3,11 +3,11 @@
  */
 const RequestModule = (() => {
   let currentParsed = null;
+  let selectedPerson = null;
 
   // DOM 元素
   const rawRequest = document.getElementById('rawRequest');
-  const requesterRole = document.getElementById('requesterRole');
-  const requesterName = document.getElementById('requesterName');
+  const personButtons = document.getElementById('personButtons');
   const btnParse = document.getElementById('btnParse');
   const btnBack = document.getElementById('btnBack');
   const btnSubmit = document.getElementById('btnSubmit');
@@ -18,26 +18,46 @@ const RequestModule = (() => {
   const parsedPreview = document.getElementById('parsedPreview');
   const submittedTaskId = document.getElementById('submittedTaskId');
 
+  // 人名按钮点击
+  personButtons.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-person');
+    if (!btn) return;
+
+    // 切换选中
+    const wasSelected = btn.classList.contains('selected');
+    personButtons.querySelectorAll('.btn-person').forEach(b => b.classList.remove('selected'));
+    
+    if (wasSelected) {
+      // 取消选择
+      selectedPerson = null;
+    } else {
+      btn.classList.add('selected');
+      selectedPerson = {
+        name: btn.dataset.name,
+        role: btn.dataset.role,
+      };
+    }
+
+    checkParseButton();
+  });
+
   // 启用/禁用解析按钮
   function checkParseButton() {
     const hasText = rawRequest.value.trim().length >= 5;
-    const hasRole = requesterRole.value !== '';
-    const hasName = requesterName.value.trim().length >= 2;
-    btnParse.disabled = !(hasText && hasRole && hasName);
+    const hasPerson = selectedPerson !== null;
+    btnParse.disabled = !(hasText && hasPerson);
   }
 
   rawRequest.addEventListener('input', checkParseButton);
-  requesterRole.addEventListener('change', checkParseButton);
-  requesterName.addEventListener('input', checkParseButton);
 
   // 解析
   btnParse.addEventListener('click', () => {
     const text = rawRequest.value.trim();
-    const role = requesterRole.value;
-    const name = requesterName.value.trim();
+    const name = selectedPerson.name;
+    const role = selectedPerson.role;
 
-    if (!text || !role || !name) {
-      App.showToast('请填写完整信息', 'error');
+    if (!text || !name) {
+      App.showToast('请填写需求并选择你的名字', 'error');
       return;
     }
 
@@ -63,6 +83,10 @@ const RequestModule = (() => {
 
     parsedPreview.innerHTML = `
       <div class="preview-field">
+        <div class="preview-label">提需人</div>
+        <div class="preview-value" style="padding-top:8px;font-weight:600;">${escapeHtml(parsed.requesterName)}（${escapeHtml(parsed.requesterRole)}）</div>
+      </div>
+      <div class="preview-field">
         <div class="preview-label">需求标题${confLabel(parsed.confidence?.title)}</div>
         <div class="preview-value">
           <input type="text" id="editTitle" value="${escapeHtml(parsed.title)}">
@@ -75,7 +99,7 @@ const RequestModule = (() => {
         </div>
       </div>
       <div class="preview-field">
-        <div class="preview-label">来源方向${confLabel(parsed.confidence?.source)}</div>
+        <div class="preview-label">来源方向</div>
         <div class="preview-value">
           <select id="editSource">
             <option value="轻松" ${parsed.source==='轻松'?'selected':''}>轻松渠道</option>
@@ -84,7 +108,7 @@ const RequestModule = (() => {
             <option value="和谐号" ${parsed.source==='和谐号'?'selected':''}>和谐号渠道</option>
             <option value="中碳" ${parsed.source==='中碳'?'selected':''}>中碳渠道</option>
             <option value="后端转化" ${parsed.source==='后端转化'?'selected':''}>后端转化</option>
-            <option value="领导" ${parsed.source==='领导'?'selected':''}>领导</option>
+            <option value="老板" ${parsed.source==='老板'?'selected':''}>老板</option>
           </select>
         </div>
       </div>
@@ -177,8 +201,8 @@ const RequestModule = (() => {
 
   function resetForm() {
     rawRequest.value = '';
-    requesterRole.value = '';
-    requesterName.value = '';
+    personButtons.querySelectorAll('.btn-person').forEach(b => b.classList.remove('selected'));
+    selectedPerson = null;
     btnParse.disabled = true;
     currentParsed = null;
     step3.classList.add('hidden');

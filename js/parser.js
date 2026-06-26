@@ -12,7 +12,7 @@ const Parser = (() => {
     '和谐号': ['和谐号', '和谐', 'hxh', 'hexiehao'],
     '中碳': ['中碳', 'zt', 'zhongtan'],
     '后端转化': ['后端', '转化', 'bdzh', 'backend'],
-    '领导': ['领导', '老板', 'boss'],
+    '老板': ['领导', '老板', 'boss'],
   };
 
   // 紧急关键词
@@ -163,11 +163,11 @@ const Parser = (() => {
       result.confidence.urgency = 'low';
     }
 
-    // 4. 重要度 — 领导提的默认重要
-    if (requesterRole === '领导' || text.includes('领导') || text.includes('老板')) {
+    // 4. 重要度 — 老板提的默认重要
+    if (requesterRole === '老板' || text.includes('老板')) {
       result.importance = 'high';
       result.confidence.importance = 'high';
-    } else if (text.includes('重要') || text.includes('关键') || text.includes('必须')) {
+    } else if (text.includes('领导') || text.includes('重要') || text.includes('关键') || text.includes('必须')) {
       result.importance = 'high';
       result.confidence.importance = 'medium';
     } else {

@@ -388,6 +388,49 @@ body {
   border-color: var(--color-primary);
 }
 
+/* ===== 人名按钮 ===== */
+.person-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.btn-person {
+  padding: 10px 20px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.btn-person:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+.btn-person.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+.btn-person-boss {
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+.btn-person-boss:hover {
+  border-color: #dc2626;
+  background: #fef2f2;
+  color: #dc2626;
+}
+.btn-person-boss.selected {
+  border-color: #dc2626;
+  background: #dc2626;
+  color: #fff;
+}
+
 /* ===== 解析预览 ===== */
 .parsed-preview { margin-bottom: 20px; }
 .preview-field {

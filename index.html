@@ -147,21 +147,15 @@
           ></textarea>
           <div class="request-meta">
             <div class="form-group">
-              <label>你的身份</label>
-              <select id="requesterRole">
-                <option value="">请选择</option>
-                <option value="轻松">轻松渠道商务</option>
-                <option value="学海">学海渠道商务</option>
-                <option value="好奇">好奇渠道商务</option>
-                <option value="和谐号">和谐号渠道商务</option>
-                <option value="中碳">中碳渠道商务</option>
-                <option value="后端转化">后端转化</option>
-                <option value="领导">领导</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>你的姓名</label>
-              <input type="text" id="requesterName" placeholder="请输入姓名">
+              <label>你是谁？</label>
+              <div class="person-buttons" id="personButtons">
+                <button class="btn-person" data-name="杨文丽" data-role="商务">杨文丽</button>
+                <button class="btn-person" data-name="徐冲" data-role="商务">徐冲</button>
+                <button class="btn-person" data-name="徐家欢" data-role="商务">徐家欢</button>
+                <button class="btn-person" data-name="储志来" data-role="商务">储志来</button>
+                <button class="btn-person" data-name="郭荣丽" data-role="商务">郭荣丽</button>
+                <button class="btn-person btn-person-boss" data-name="老板" data-role="老板">老板</button>
+              </div>
             </div>
           </div>
           <button class="btn btn-primary" id="btnParse" disabled>AI 解析需求</button>
