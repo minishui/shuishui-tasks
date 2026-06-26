@@ -5,9 +5,10 @@ const RequestModule = (() => {
   let currentParsed = null;
   let selectedPerson = null;
 
-  // DOM 元素
   const rawRequest = document.getElementById('rawRequest');
   const personButtons = document.getElementById('personButtons');
+  const otherNameWrap = document.getElementById('otherNameWrap');
+  const otherName = document.getElementById('otherName');
   const btnParse = document.getElementById('btnParse');
   const btnBack = document.getElementById('btnBack');
   const btnSubmit = document.getElementById('btnSubmit');
@@ -23,25 +24,47 @@ const RequestModule = (() => {
     const btn = e.target.closest('.btn-person');
     if (!btn) return;
 
-    // 切换选中
+    const isOther = btn.classList.contains('btn-person-other');
     const wasSelected = btn.classList.contains('selected');
+
     personButtons.querySelectorAll('.btn-person').forEach(b => b.classList.remove('selected'));
-    
-    if (wasSelected) {
-      // 取消选择
+
+    if (wasSelected && !isOther) {
       selectedPerson = null;
+      otherNameWrap.classList.add('hidden');
+    } else if (wasSelected && isOther) {
+      selectedPerson = null;
+      otherNameWrap.classList.add('hidden');
+      otherName.value = '';
     } else {
       btn.classList.add('selected');
-      selectedPerson = {
-        name: btn.dataset.name,
-        role: btn.dataset.role,
-      };
+      if (isOther) {
+        otherNameWrap.classList.remove('hidden');
+        otherName.focus();
+        selectedPerson = null; // 等名字输入
+      } else {
+        otherNameWrap.classList.add('hidden');
+        selectedPerson = {
+          name: btn.dataset.name,
+          role: btn.dataset.role,
+        };
+      }
     }
 
     checkParseButton();
   });
 
-  // 启用/禁用解析按钮
+  // 其他名字输入
+  otherName.addEventListener('input', () => {
+    const name = otherName.value.trim();
+    if (name.length >= 2) {
+      selectedPerson = { name, role: '其他' };
+    } else {
+      selectedPerson = null;
+    }
+    checkParseButton();
+  });
+
   function checkParseButton() {
     const hasText = rawRequest.value.trim().length >= 5;
     const hasPerson = selectedPerson !== null;
@@ -50,7 +73,6 @@ const RequestModule = (() => {
 
   rawRequest.addEventListener('input', checkParseButton);
 
-  // 解析
   btnParse.addEventListener('click', () => {
     const text = rawRequest.value.trim();
     const name = selectedPerson.name;
@@ -62,7 +84,6 @@ const RequestModule = (() => {
     }
 
     currentParsed = Parser.parse(text, role, name);
-
     if (!currentParsed) {
       App.showToast('无法解析需求，请描述得更具体一些', 'error');
       return;
@@ -73,7 +94,6 @@ const RequestModule = (() => {
     step2.classList.remove('hidden');
   });
 
-  // 渲染预览
   function renderPreview(parsed) {
     const confLabel = (level) => {
       const map = { high: '高置信度', medium: '中置信度', low: '低置信度（请确认）' };
@@ -88,15 +108,11 @@ const RequestModule = (() => {
       </div>
       <div class="preview-field">
         <div class="preview-label">需求标题${confLabel(parsed.confidence?.title)}</div>
-        <div class="preview-value">
-          <input type="text" id="editTitle" value="${escapeHtml(parsed.title)}">
-        </div>
+        <div class="preview-value"><input type="text" id="editTitle" value="${escapeHtml(parsed.title)}"></div>
       </div>
       <div class="preview-field">
         <div class="preview-label">需求描述</div>
-        <div class="preview-value">
-          <textarea id="editDescription">${escapeHtml(parsed.description)}</textarea>
-        </div>
+        <div class="preview-value"><textarea id="editDescription">${escapeHtml(parsed.description)}</textarea></div>
       </div>
       <div class="preview-field">
         <div class="preview-label">来源方向</div>
@@ -132,26 +148,19 @@ const RequestModule = (() => {
       </div>
       <div class="preview-field">
         <div class="preview-label">期望交付日${confLabel(parsed.confidence?.expectedDelivery)}</div>
-        <div class="preview-value">
-          <input type="date" id="editDelivery" value="${parsed.expectedDelivery || ''}">
-        </div>
+        <div class="preview-value"><input type="date" id="editDelivery" value="${parsed.expectedDelivery || ''}"></div>
       </div>
       <div class="preview-field">
         <div class="preview-label">参考链接${confLabel(parsed.confidence?.reference)}</div>
-        <div class="preview-value">
-          <input type="text" id="editReference" value="${escapeHtml(parsed.reference || '')}" placeholder="文档链接、截图等">
-        </div>
-      </div>
-    `;
+        <div class="preview-value"><input type="text" id="editReference" value="${escapeHtml(parsed.reference || '')}" placeholder="文档链接、截图等"></div>
+      </div>`;
   }
 
-  // 返回修改
   btnBack.addEventListener('click', () => {
     step2.classList.add('hidden');
     step1.classList.remove('hidden');
   });
 
-  // 提交
   btnSubmit.addEventListener('click', () => {
     const title = document.getElementById('editTitle').value.trim();
     const description = document.getElementById('editDescription').value.trim();
@@ -161,7 +170,6 @@ const RequestModule = (() => {
     const expectedDelivery = document.getElementById('editDelivery').value;
     const reference = document.getElementById('editReference').value.trim();
 
-    // 最终校验
     const finalParsed = {
       title, description, source, urgency, importance, expectedDelivery, reference,
       requesterRole: currentParsed.requesterRole,
@@ -173,35 +181,28 @@ const RequestModule = (() => {
       return;
     }
 
-    // 存入
     const task = Store.addTask({
-      title,
-      description,
-      source,
+      title, description, source,
       requesterRole: finalParsed.requesterRole,
       requesterName: finalParsed.requesterName,
-      urgency,
-      importance,
-      expectedDelivery,
-      reference,
+      urgency, importance, expectedDelivery, reference,
       status: 'pending',
     });
 
     submittedTaskId.textContent = task.taskNumber;
     step2.classList.add('hidden');
     step3.classList.remove('hidden');
-
-    // 刷新看板
     DashboardModule.refresh();
     App.updateBadges();
   });
 
-  // 提交新需求
   btnNewRequest.addEventListener('click', resetForm);
 
   function resetForm() {
     rawRequest.value = '';
     personButtons.querySelectorAll('.btn-person').forEach(b => b.classList.remove('selected'));
+    otherNameWrap.classList.add('hidden');
+    otherName.value = '';
     selectedPerson = null;
     btnParse.disabled = true;
     currentParsed = null;

@@ -99,9 +99,10 @@ body {
 /* ===== 统计卡片 ===== */
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, 1fr) auto;
   gap: 16px;
   margin-bottom: 20px;
+  align-items: stretch;
 }
 .stat-card {
   background: var(--color-surface);
@@ -118,6 +119,31 @@ body {
 .stat-card.stat-done { border-left-color: var(--color-success); }
 .stat-value { font-size: 32px; font-weight: 700; }
 .stat-label { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+
+/* ===== 添加任务按钮 ===== */
+.btn-add-task {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 20px;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  min-width: 130px;
+}
+.btn-add-task:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+.btn-add-task:active { transform: scale(0.98); }
 
 /* ===== 告警区 ===== */
 .alert-area { margin-bottom: 20px; }
@@ -319,6 +345,60 @@ body {
 .done-item .done-title { font-weight: 500; }
 .done-item .done-date { font-size: 12px; color: var(--color-text-secondary); }
 
+/* ===== 例行任务区 ===== */
+.routine-section {
+  margin-top: 24px;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid #e0e7ff;
+}
+.routine-hint {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  margin-left: 8px;
+}
+.routine-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.routine-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fafbfc;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+.routine-title {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+}
+.routine-title:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+.routine-repeat, .routine-urgency, .routine-importance {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+  cursor: pointer;
+}
+.routine-generate:disabled { opacity: 0.4; cursor: not-allowed; }
+
 /* ===== 提需入口 ===== */
 .request-container {
   max-width: 720px;
@@ -402,73 +482,65 @@ body {
   color: var(--color-text);
 }
 
-/* ===== 人名按钮卡片 ===== */
+/* ===== 人名按钮 ===== */
 .person-buttons {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .btn-person {
-  padding: 16px 12px;
+  padding: 8px 16px;
   border: 2px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: 20px;
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-.btn-person::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius);
-  opacity: 0;
-  transition: opacity 0.2s;
 }
 .btn-person:hover {
   border-color: var(--color-primary);
   background: var(--color-primary-light);
   color: var(--color-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
-}
-.btn-person:active {
-  transform: translateY(0);
 }
 .btn-person.selected {
   border-color: var(--color-primary);
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  background: var(--color-primary);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35);
-  transform: translateY(-1px);
 }
-.btn-person.selected::before {
-  content: '✓ ';
+.btn-person-other {
+  border-style: dashed;
+  color: var(--color-text-secondary);
 }
-.btn-person-boss {
-  border-color: #fecaca;
-  background: linear-gradient(135deg, #fff5f5 0%, #fef2f2 100%);
-  color: #dc2626;
-  grid-column: span 3;
+.btn-person-other:hover {
+  border-color: var(--color-text-secondary);
+  background: #f3f4f6;
+  color: var(--color-text);
 }
-.btn-person-boss:hover {
-  border-color: #dc2626;
-  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-  color: #dc2626;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
-}
-.btn-person-boss.selected {
-  border-color: #dc2626;
-  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+.btn-person-other.selected {
+  border-color: var(--color-text-secondary);
+  background: #374151;
   color: #fff;
-  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4);
+}
+.other-name-input {
+  margin-top: 10px;
+  transition: all 0.2s;
+}
+.other-name-input.hidden { display: none; }
+.other-name-input input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+}
+.other-name-input input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
 }
 
 /* ===== 解析预览 ===== */

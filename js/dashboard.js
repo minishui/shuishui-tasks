@@ -345,3 +345,249 @@ const DashboardModule = (() => {
     showTaskDetail,
   };
 })();
+
+// ===== 快速添加任务（水水自己用） =====
+(() => {
+  const btnAddTask = document.getElementById('btnAddTask');
+  btnAddTask.addEventListener('click', () => {
+    const modal = document.getElementById('taskModal');
+    document.getElementById('modalTitle').textContent = '添加任务';
+    document.getElementById('modalBody').innerHTML = `
+      <div style="display:grid;gap:14px;font-size:14px;">
+        <div>
+          <label style="display:block;font-weight:600;margin-bottom:4px;">任务标题</label>
+          <input type="text" id="addTitle" placeholder="输入任务标题" style="width:100%;padding:10px;border:1px solid var(--color-border);border-radius:6px;font-size:14px;font-family:inherit;">
+        </div>
+        <div>
+          <label style="display:block;font-weight:600;margin-bottom:4px;">任务描述</label>
+          <textarea id="addDesc" placeholder="补充描述（选填）" style="width:100%;height:80px;padding:10px;border:1px solid var(--color-border);border-radius:6px;font-size:14px;font-family:inherit;resize:vertical;"></textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <label style="display:block;font-weight:600;margin-bottom:4px;">紧急度</label>
+            <select id="addUrgency" style="width:100%;padding:10px;border:1px solid var(--color-border);border-radius:6px;font-size:14px;">
+              <option value="low">不紧急</option>
+              <option value="high">紧急</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-weight:600;margin-bottom:4px;">重要度</label>
+            <select id="addImportance" style="width:100%;padding:10px;border:1px solid var(--color-border);border-radius:6px;font-size:14px;">
+              <option value="low">不重要</option>
+              <option value="high">重要</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-weight:600;margin-bottom:4px;">截止日期（选填）</label>
+          <input type="date" id="addDeadline" style="width:100%;padding:10px;border:1px solid var(--color-border);border-radius:6px;font-size:14px;">
+        </div>
+      </div>`;
+    document.getElementById('modalFooter').innerHTML = `
+      <button class="btn btn-secondary" onclick="document.getElementById('taskModal').classList.add('hidden')">取消</button>
+      <button class="btn btn-primary" id="btnConfirmAdd">添加</button>`;
+    document.getElementById('btnConfirmAdd').addEventListener('click', () => {
+      const title = document.getElementById('addTitle').value.trim();
+      if (!title) { App.showToast('请输入任务标题', 'error'); return; }
+      Store.addTask({
+        title,
+        description: document.getElementById('addDesc').value.trim(),
+        source: '水水',
+        requesterRole: '水水',
+        requesterName: '水水',
+        urgency: document.getElementById('addUrgency').value,
+        importance: document.getElementById('addImportance').value,
+        expectedDelivery: document.getElementById('addDeadline').value,
+        reference: '',
+        status: 'pending',
+      });
+      App.showToast('任务已添加', 'success');
+      document.getElementById('taskModal').classList.add('hidden');
+      DashboardModule.refresh();
+      App.updateBadges();
+    });
+    modal.classList.remove('hidden');
+  });
+})();
+
+// ===== 例行任务区 =====
+(() => {
+  const routineList = document.getElementById('routineList');
+  const btnAddRoutine = document.getElementById('btnAddRoutine');
+  const ROUTINE_KEY = 'task_manager_routines';
+
+  function loadRoutines() {
+    try {
+      return JSON.parse(localStorage.getItem(ROUTINE_KEY) || '[]');
+    } catch (e) { return []; }
+  }
+
+  function saveRoutines(routines) {
+    localStorage.setItem(ROUTINE_KEY, JSON.stringify(routines));
+  }
+
+  function renderRoutines() {
+    const routines = loadRoutines();
+    if (routines.length === 0) {
+      routineList.innerHTML = `<div class="routine-item" id="routineTemplate">
+        <input type="text" class="routine-title" placeholder="任务名称，如：渠道数据日报" maxlength="30">
+        <select class="routine-repeat">
+          <option value="daily">每天</option>
+          <option value="weekly">每周</option>
+          <option value="biweekly">每两周</option>
+          <option value="monthly">每月</option>
+        </select>
+        <select class="routine-urgency">
+          <option value="low">不紧急</option>
+          <option value="high">紧急</option>
+        </select>
+        <select class="routine-importance">
+          <option value="low">不重要</option>
+          <option value="high">重要</option>
+        </select>
+        <button class="btn btn-sm btn-primary routine-generate" disabled>生成</button>
+        <button class="btn btn-sm btn-secondary routine-delete" style="display:none;">×</button>
+      </div>`;
+      bindTemplate();
+      return;
+    }
+
+    routineList.innerHTML = routines.map((r, i) => `
+      <div class="routine-item" data-index="${i}">
+        <input type="text" class="routine-title" value="${escapeHtml(r.title)}" maxlength="30">
+        <select class="routine-repeat">
+          <option value="daily" ${r.repeat==='daily'?'selected':''}>每天</option>
+          <option value="weekly" ${r.repeat==='weekly'?'selected':''}>每周</option>
+          <option value="biweekly" ${r.repeat==='biweekly'?'selected':''}>每两周</option>
+          <option value="monthly" ${r.repeat==='monthly'?'selected':''}>每月</option>
+        </select>
+        <select class="routine-urgency">
+          <option value="low" ${r.urgency==='low'?'selected':''}>不紧急</option>
+          <option value="high" ${r.urgency==='high'?'selected':''}>紧急</option>
+        </select>
+        <select class="routine-importance">
+          <option value="low" ${r.importance==='low'?'selected':''}>不重要</option>
+          <option value="high" ${r.importance==='high'?'selected':''}>重要</option>
+        </select>
+        <button class="btn btn-sm btn-primary routine-generate">生成</button>
+        <button class="btn btn-sm btn-secondary routine-delete">×</button>
+      </div>
+    `).join('');
+
+    // 绑定事件
+    routineList.querySelectorAll('.routine-item').forEach(item => {
+      const idx = item.dataset.index !== undefined ? parseInt(item.dataset.index) : null;
+      const titleInput = item.querySelector('.routine-title');
+      const repeatSelect = item.querySelector('.routine-repeat');
+      const urgencySelect = item.querySelector('.routine-urgency');
+      const importanceSelect = item.querySelector('.routine-importance');
+      const genBtn = item.querySelector('.routine-generate');
+      const delBtn = item.querySelector('.routine-delete');
+
+      function updateRoutine() {
+        const routines = loadRoutines();
+        routines[idx] = {
+          title: titleInput.value.trim(),
+          repeat: repeatSelect.value,
+          urgency: urgencySelect.value,
+          importance: importanceSelect.value,
+        };
+        saveRoutines(routines);
+      }
+
+      titleInput.addEventListener('input', () => {
+        genBtn.disabled = !titleInput.value.trim();
+        if (idx !== null) updateRoutine();
+      });
+
+      repeatSelect.addEventListener('change', () => { if (idx !== null) updateRoutine(); });
+      urgencySelect.addEventListener('change', () => { if (idx !== null) updateRoutine(); });
+      importanceSelect.addEventListener('change', () => { if (idx !== null) updateRoutine(); });
+
+      genBtn.addEventListener('click', () => {
+        const title = titleInput.value.trim();
+        if (!title) return;
+        Store.addTask({
+          title,
+          description: `[例行任务] 频率：${repeatSelect.options[repeatSelect.selectedIndex].text}`,
+          source: '水水',
+          requesterRole: '水水',
+          requesterName: '水水',
+          urgency: urgencySelect.value,
+          importance: importanceSelect.value,
+          expectedDelivery: '',
+          reference: '',
+          status: 'pending',
+        });
+        App.showToast(`已生成：${title}`, 'success');
+        DashboardModule.refresh();
+        App.updateBadges();
+      });
+
+      delBtn.addEventListener('click', () => {
+        if (!confirm('删除这个例行任务模板？')) return;
+        const routines = loadRoutines();
+        routines.splice(idx, 1);
+        saveRoutines(routines);
+        renderRoutines();
+      });
+    });
+  }
+
+  function bindTemplate() {
+    const item = document.getElementById('routineTemplate');
+    const titleInput = item.querySelector('.routine-title');
+    const repeatSelect = item.querySelector('.routine-repeat');
+    const urgencySelect = item.querySelector('.routine-urgency');
+    const importanceSelect = item.querySelector('.routine-importance');
+    const genBtn = item.querySelector('.routine-generate');
+
+    titleInput.addEventListener('input', () => {
+      genBtn.disabled = !titleInput.value.trim();
+    });
+
+    genBtn.addEventListener('click', () => {
+      const title = titleInput.value.trim();
+      if (!title) return;
+      const routines = loadRoutines();
+      routines.push({
+        title,
+        repeat: repeatSelect.value,
+        urgency: urgencySelect.value,
+        importance: importanceSelect.value,
+      });
+      saveRoutines(routines);
+      Store.addTask({
+        title,
+        description: `[例行任务] 频率：${repeatSelect.options[repeatSelect.selectedIndex].text}`,
+        source: '水水',
+        requesterRole: '水水',
+        requesterName: '水水',
+        urgency: urgencySelect.value,
+        importance: importanceSelect.value,
+        expectedDelivery: '',
+        reference: '',
+        status: 'pending',
+      });
+      App.showToast(`已添加例行任务：${title}`, 'success');
+      renderRoutines();
+      DashboardModule.refresh();
+      App.updateBadges();
+    });
+  }
+
+  btnAddRoutine.addEventListener('click', () => {
+    const routines = loadRoutines();
+    routines.push({ title: '', repeat: 'weekly', urgency: 'low', importance: 'low' });
+    saveRoutines(routines);
+    renderRoutines();
+  });
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  renderRoutines();
+})();

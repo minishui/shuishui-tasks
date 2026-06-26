@@ -51,6 +51,7 @@
           <div class="stat-value" id="statDone">0</div>
           <div class="stat-label">已完成</div>
         </div>
+        <button class="btn btn-add-task" id="btnAddTask" title="自己快速添加任务">+ 添加任务</button>
       </div>
 
       <!-- 告警区 -->
@@ -120,6 +121,33 @@
           <div class="empty-state">暂无已完成任务</div>
         </div>
       </div>
+
+      <!-- 例行任务区 -->
+      <div class="routine-section" id="routineSection">
+        <h2 class="section-title">例行任务 <span class="routine-hint">设置重复任务模板，点一下即可生成</span></h2>
+        <div class="routine-list" id="routineList">
+          <div class="routine-item" id="routineTemplate">
+            <input type="text" class="routine-title" placeholder="任务名称，如：渠道数据日报" maxlength="30">
+            <select class="routine-repeat">
+              <option value="daily">每天</option>
+              <option value="weekly">每周</option>
+              <option value="biweekly">每两周</option>
+              <option value="monthly">每月</option>
+            </select>
+            <select class="routine-urgency">
+              <option value="low">不紧急</option>
+              <option value="high">紧急</option>
+            </select>
+            <select class="routine-importance">
+              <option value="low">不重要</option>
+              <option value="high">重要</option>
+            </select>
+            <button class="btn btn-sm btn-primary routine-generate" disabled>生成</button>
+            <button class="btn btn-sm btn-secondary routine-delete" style="display:none;">×</button>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="btnAddRoutine">+ 添加例行任务</button>
+      </div>
     </section>
 
     <!-- ==================== 提需入口 ==================== -->
@@ -154,7 +182,10 @@
                 <button class="btn-person" data-name="徐家欢" data-role="商务">徐家欢</button>
                 <button class="btn-person" data-name="储志来" data-role="商务">储志来</button>
                 <button class="btn-person" data-name="郭荣丽" data-role="商务">郭荣丽</button>
-                <button class="btn-person btn-person-boss" data-name="老板" data-role="老板">老板</button>
+                <button class="btn-person btn-person-other" data-name="" data-role="">其他</button>
+              </div>
+              <div class="other-name-input hidden" id="otherNameWrap">
+                <input type="text" id="otherName" placeholder="请输入你的名字" maxlength="10">
               </div>
             </div>
           </div>
