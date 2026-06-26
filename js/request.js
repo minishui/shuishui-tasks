@@ -115,20 +115,6 @@ const RequestModule = (() => {
         <div class="preview-value"><textarea id="editDescription">${escapeHtml(parsed.description)}</textarea></div>
       </div>
       <div class="preview-field">
-        <div class="preview-label">来源方向</div>
-        <div class="preview-value">
-          <select id="editSource">
-            <option value="轻松" ${parsed.source==='轻松'?'selected':''}>轻松渠道</option>
-            <option value="学海" ${parsed.source==='学海'?'selected':''}>学海渠道</option>
-            <option value="好奇" ${parsed.source==='好奇'?'selected':''}>好奇渠道</option>
-            <option value="和谐号" ${parsed.source==='和谐号'?'selected':''}>和谐号渠道</option>
-            <option value="中碳" ${parsed.source==='中碳'?'selected':''}>中碳渠道</option>
-            <option value="后端转化" ${parsed.source==='后端转化'?'selected':''}>后端转化</option>
-            <option value="老板" ${parsed.source==='老板'?'selected':''}>老板</option>
-          </select>
-        </div>
-      </div>
-      <div class="preview-field">
         <div class="preview-label">紧急度${confLabel(parsed.confidence?.urgency)}</div>
         <div class="preview-value">
           <select id="editUrgency">
@@ -164,16 +150,16 @@ const RequestModule = (() => {
   btnSubmit.addEventListener('click', () => {
     const title = document.getElementById('editTitle').value.trim();
     const description = document.getElementById('editDescription').value.trim();
-    const source = document.getElementById('editSource').value;
     const urgency = document.getElementById('editUrgency').value;
     const importance = document.getElementById('editImportance').value;
     const expectedDelivery = document.getElementById('editDelivery').value;
     const reference = document.getElementById('editReference').value.trim();
 
     const finalParsed = {
-      title, description, source, urgency, importance, expectedDelivery, reference,
+      title, description, urgency, importance, expectedDelivery, reference,
       requesterRole: currentParsed.requesterRole,
       requesterName: currentParsed.requesterName,
+      source: currentParsed.requesterRole,
     };
     const errors = Parser.validate(finalParsed);
     if (errors.length > 0) {
@@ -182,7 +168,8 @@ const RequestModule = (() => {
     }
 
     const task = Store.addTask({
-      title, description, source,
+      title, description,
+      source: finalParsed.requesterRole,
       requesterRole: finalParsed.requesterRole,
       requesterName: finalParsed.requesterName,
       urgency, importance, expectedDelivery, reference,
